@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Post Section -->
+<div class="post-box">
+    <div class="headline">
+        <h3 class="post-title">{{ article.title }}</h3>
+    </div>
+    <div class="body">
+        <p class="post-body">{{ article.post }}</p>
+    </div>
+    <div class="created-by">
+        <p class="authour">{{article.user.name}}</p>
+        <p class="date">{{article.created.strftime("%b %d, %Y")}}</p>
+        <!-- Displays 'like' functions to logged in users only-->
+        {% if is_logged_in == True %}
+        <!-- unlike functionality for liked posts -->
+        {% if already_liked == True %}
+        <form class="like-count" action="/{{ article.key().id()}}/like" method="post">
+            <button class="like-count" type="submit" value="unlike" name="like-button">Unlike</button>
+        </form>
+        {% endif %}
+        <!-- restricts liking to non-authour users who havent already liked -->
+        {% if article.user.name != logged_in_user.name and already_liked == False %}
+        <form class="like-count" action="/{{ article.key().id()}}/like" method="post">
+            <button class="like-count" type="submit" value="like" name="like-button">Like</button>
+        </form>
+        {% endif %} {% endif %}
+        <p class="like-count"><i class="fa fa-heart-o" aria-hidden="true"></i> {{article.likes.count()}}</p>
+    </div>
+    <!-- Controls edit post permissions: post author only -->
+    {% if article.user.name == logged_in_user.name: %}
+    <div class="user-only-actions">
+        <a class="edit" href="/{{article.key().id()}}/edit">Edit</a>
+        <form class="delete" action="/{{article.key().id()}}/delete" method="post">
+            <button id="post-delete" type="submit" method="post">Delete</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+<!-- Comment Section -->
+<div class="comment-row row">
+    <!-- Controls commenting permissions: logged in users only -->
+    {% if is_logged_in == True %}
+    <form method="post">
+        <label>
+          <textarea class="comment-form" name="comment" cols="80" rows="5" placeholder="Add your thoughts....."></textarea>
+        </label>
+        <input id="submit-comment" type="submit">
+    </form>
+    {% endif %}
+</div>
+<!-- Displays all comments on post -->
+{% for comment in article.post_comments%}
+<div class="comment-box">
+    <div class="comment">
+        <p class="authour-comment">{{comment.user.name}}</p>
+        <p class="date-comment">{{comment.created.strftime("%b %d, %Y")}}</p>
+        <br>
+        <p class="body">{{comment.comment}}</p>
+        {% if comment.user.name == logged_in_user.name %}
+        <a href="/{{article.key().id()}}/comment/{{comment.key().id()}}">Edit</a> {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
