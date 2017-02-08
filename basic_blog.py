@@ -137,10 +137,13 @@ class PostPage(Handler):
             # returns returns True if the current user has liked the article
             if logged_in_user:
                 already_liked = (logged_in_user.likes.filter("post = ",
-                                                             article).count() > 0)
+                                                             article
+                                                             ).count() > 0)
 
-            self.render('post.html', article=article, is_logged_in=is_logged_in,
-                        logged_in_user=logged_in_user, already_liked=already_liked)
+            self.render('post.html', article=article,
+                        is_logged_in=is_logged_in,
+                        logged_in_user=logged_in_user,
+                        already_liked=already_liked)
 
     def get(self, post_id):
         """ handles get request """
@@ -175,7 +178,8 @@ class EditPost(Handler):
             is_logged_in = self.is_logged_in()
             logged_in_user = self.logged_in_user()
             if logged_in_user.name == post.user.name:
-                self.render('editpost.html', post=post, is_logged_in=is_logged_in,
+                self.render('editpost.html', post=post,
+                            is_logged_in=is_logged_in,
                             post_id=post_id)
             else:
                 self.write("you can't edit other peoples posts")
@@ -189,6 +193,7 @@ class EditPost(Handler):
         post.post = content
         post.put()  # pylint: disable=no-member
         self.redirect('/' + post_id)
+
 
 class EditComment(Handler):
     """ Handles requests for the edit comment page """
@@ -206,8 +211,9 @@ class EditComment(Handler):
         if comment:
             if logged_in_user.name == comment.user.name:
                 comment = Comment.comment_by_id(comment_id)
-                self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment,
-                            comment_id=comment_id, post_id=post_id)
+                self.render('editcomment.html', is_logged_in=is_logged_in,
+                            comment=comment, comment_id=comment_id,
+                            post_id=post_id)
             else:
                 self.write("You can only edit your own comments")
 
@@ -363,7 +369,7 @@ class LikeHandler(Handler):
         if not user:
             self.redirect('/login')
 
-        if user:
+        if user is not post.user.name:
             if action == 'like':
                 like = Like(post=post, user=user)
                 like.put()
@@ -373,16 +379,7 @@ class LikeHandler(Handler):
             self.redirect('/' + post_id)
 
 
-
-
 #  SIGN UP PAGE FUNCTIONS
-
-# regex constant for username validation
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-# regex constant for password validation
-PASSWORD_RE = re.compile(r"^.{3,20}$")
-# regex constant for email validation
-EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
 
 def valid_login(username, password):
@@ -395,17 +392,23 @@ def valid_login(username, password):
 
 def valid_username(username):
     """ checks for valid username """
-    return username and USER_RE.match(username)
+    # regex constant for username validation
+    user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+    return username and user_re.match(username)
 
 
 def valid_password(password):
     """ checks for valid password """
-    return password and PASSWORD_RE.match(password)
+    # regex constant for password validation
+    password_re = re.compile(r"^.{3,20}$")
+    return password and password_re.match(password)
 
 
 def valid_email(email):
     """ checks for valid email """
-    return email and EMAIL_RE.match(email)
+    # regex constant for email validation
+    email_re = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+    return email and email_re.match(email)
 
 
 def escape_html(value):
@@ -453,7 +456,7 @@ def check_secure_val(secure_val):
 
 # Routing
 
-app = webapp2.WSGIApplication([('/', MainPage), # pylint: disable=C0103
+app = webapp2.WSGIApplication([('/', MainPage),
                                ('/newpost', NewPost),
                                (r'/(\d+)/edit', EditPost),
                                (r'/(\d+)/comment/(\d+)', EditComment),
@@ -464,4 +467,4 @@ app = webapp2.WSGIApplication([('/', MainPage), # pylint: disable=C0103
                                ('/login', LoginPage),
                                ('/logout', LogOut),
                                (r'/(\d+)/like', LikeHandler)
-                              ], debug=True)
+                               ], debug=True)
