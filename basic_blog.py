@@ -193,14 +193,15 @@ class EditPost(Handler):
 class EditComment(Handler):
     """ Handles requests for the edit comment page """
 
-    def get(self, comment_id):
+    def get(self, post_id, comment_id):
         """ defines get """
         is_logged_in = self.is_logged_in()
         logged_in_user = self.logged_in_user()
         comment = Comment.comment_by_id(comment_id)
         if logged_in_user.name == comment.user.name:
             comment = Comment.comment_by_id(comment_id)
-            self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment)
+            self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment,
+                        comment_id=comment_id)
         else:
             self.write("You can only edit your own comments")
 
