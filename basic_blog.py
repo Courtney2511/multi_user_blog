@@ -207,7 +207,7 @@ class EditComment(Handler):
             if logged_in_user.name == comment.user.name:
                 comment = Comment.comment_by_id(comment_id)
                 self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment,
-                            comment_id=comment_id)
+                            comment_id=comment_id, post_id=post_id)
             else:
                 self.write("You can only edit your own comments")
 
@@ -222,8 +222,6 @@ class EditComment(Handler):
 
 class DeletePost(Handler):
     """ Handle requests to delete likes """
-    def get(self, post_id):
-        """ handles get request """
 
     def post(self, post_id):
         """ deletes post form db """
