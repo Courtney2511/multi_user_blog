@@ -360,13 +360,17 @@ class LikeHandler(Handler):
         user = self.logged_in_user()
         post = Post.post_by_id(post_id)
 
-        if action == 'like':
-            like = Like(post=post, user=user)
-            like.put()
-        else:
-            like = user.likes.filter("post =", post).get()
-            like.delete()
-        self.redirect('/' + post_id)
+        if not user:
+            self.redirect('/login')
+
+        if user:
+            if action == 'like':
+                like = Like(post=post, user=user)
+                like.put()
+            else:
+                like = user.likes.filter("post =", post).get()
+                like.delete()
+            self.redirect('/' + post_id)
 
 
 
