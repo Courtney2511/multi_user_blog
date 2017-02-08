@@ -198,12 +198,18 @@ class EditComment(Handler):
         is_logged_in = self.is_logged_in()
         logged_in_user = self.logged_in_user()
         comment = Comment.comment_by_id(comment_id)
-        if logged_in_user.name == comment.user.name:
-            comment = Comment.comment_by_id(comment_id)
-            self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment,
-                        comment_id=comment_id)
-        else:
-            self.write("You can only edit your own comments")
+
+        if not comment:
+            self.error(404)
+            self.response.write("oops! nothing to see here!")
+
+        if comment:
+            if logged_in_user.name == comment.user.name:
+                comment = Comment.comment_by_id(comment_id)
+                self.render('editcomment.html', is_logged_in=is_logged_in, comment=comment,
+                            comment_id=comment_id)
+            else:
+                self.write("You can only edit your own comments")
 
     def post(self, post_id, comment_id):
         """" defines post """
