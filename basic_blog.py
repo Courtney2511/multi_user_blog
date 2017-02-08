@@ -130,13 +130,17 @@ class PostPage(Handler):
         logged_in_user = self.logged_in_user()
         article = Post.get_by_id(int(post_id))
         already_liked = False
-        # returns returns True if the current user has liked the article
-        if logged_in_user:
-            already_liked = (logged_in_user.likes.filter("post = ",
-                                                         article).count() > 0)
+        if not article:
+            self.error(404)
+            self.response.write("oops! nothing to see here")
+        if article:
+            # returns returns True if the current user has liked the article
+            if logged_in_user:
+                already_liked = (logged_in_user.likes.filter("post = ",
+                                                             article).count() > 0)
 
-        self.render('post.html', article=article, is_logged_in=is_logged_in,
-                    logged_in_user=logged_in_user, already_liked=already_liked)
+            self.render('post.html', article=article, is_logged_in=is_logged_in,
+                        logged_in_user=logged_in_user, already_liked=already_liked)
 
     def get(self, post_id):
         """ handles get request """
@@ -163,13 +167,18 @@ class EditPost(Handler):
     def get(self, post_id):
         """ defines get """
         post = Post.post_by_id(post_id)
-        is_logged_in = self.is_logged_in()
-        logged_in_user = self.logged_in_user()
-        if logged_in_user.name == post.user.name:  # pylint: disable=no-member
-            self.render('editpost.html', post=post, is_logged_in=is_logged_in,
-                        post_id=post_id)
-        else:
-            self.write("you can't edit other peoples posts")
+
+        if not post:
+            self.error(404)
+            self.response.write("oops! nothing to see here")
+        if post:
+            is_logged_in = self.is_logged_in()
+            logged_in_user = self.logged_in_user()
+            if logged_in_user.name == post.user.name:
+                self.render('editpost.html', post=post, is_logged_in=is_logged_in,
+                            post_id=post_id)
+            else:
+                self.write("you can't edit other peoples posts")
 
     def post(self, post_id):
         """ defines posts """
